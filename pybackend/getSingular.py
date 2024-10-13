@@ -1,5 +1,7 @@
 import json
 
+
+
 def getSingular(word):
     with open('plurals.txt', 'r',encoding="utf-8") as f:
         pluralsDictionary = json.load(f)
