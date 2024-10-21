@@ -22,70 +22,34 @@ priorPositiveProbability = totalPositiveSentence/totalSentences
 # prior probability for Negative
 priorNegativeProbability = totalNegativeSentece/totalSentences
 
-print("priorPositiveProbability",priorPositiveProbability)
-print("priorNegativeProbability",priorNegativeProbability)
 
 # likelihood of sentence for positive class
-sentence = "bad hate love love this hate"
+sentence = "love this"
 sentenceTokenized = sentence.split()
 
-likelihoodOfPositiveClass = 1
-likelihoodOfNegativeClass = 1
+def calculateLikelihood(sentenceTokenized,classLabel):
+    finalLikelihood = 1
+    for token in sentenceTokenized:
+        likelihoodOfGivenClass = 0
+        totalTokenPosOnGivenClass = 0
+        totalNoOfToken = 0
 
-# positive likelihood
+        for i in range (len(label)):
+            if(matrix[token][i] ==1 and label[i]==classLabel):
+                totalTokenPosOnGivenClass += 1
+        
+        totalNoOfToken = sum(matrix[token])
 
-for token in sentenceTokenized:
-    likelihoodOfTokenInPosClass = 0
-    # calculate count of that token present in class(pos or neg)
-    totalTokenPosLabelPos = 0
-    totalNoOfToken = 0
-    for i in range(len(label)):
-        if(matrix[token][i] == 1 and label[i] == 1):
-            totalTokenPosLabelPos += 1
+        if(totalTokenPosOnGivenClass == 0):
+            likelihoodOfGivenClass = 1 / (totalNoOfToken + len(vocabulary))
+        else:
+            likelihoodOfGivenClass = totalTokenPosOnGivenClass / totalNoOfToken
 
-    # total count of that token in all class (pos or neg)
-    totalNoOfToken = sum(matrix[token])
+        finalLikelihood *= likelihoodOfGivenClass
 
-    # zero probability problem if token not present in class (pos or neg)
-    if(totalTokenPosLabelPos == 0):
-        likelihoodOfTokenInPosClass = 1 / (totalNoOfToken + len(vocabulary))
-    else:
-        likelihoodOfTokenInPosClass = totalTokenPosLabelPos / totalNoOfToken
-    
-    # multiply each likelihood to calc total likelihood
-    likelihoodOfPositiveClass *= likelihoodOfTokenInPosClass
-    
-# posterior probablility of positive class and sentence
-posteriorProbOfPosClass = priorPositiveProbability * likelihoodOfPositiveClass
-print("posterior prob of pos class: ", posteriorProbOfPosClass)
+    return finalLikelihood
 
-
-
-# negative likelihood
-for token in sentenceTokenized:
-    likelihoodOfTokenInNegClass = 0
-    # calculate count of that token present in class(pos or neg)
-    totalTokenPosLabelNeg = 0
-    totalNoOfToken = 0
-    for i in range(len(label)):
-        if(matrix[token][i] == 1 and label[i] == 0):
-            totalTokenPosLabelNeg += 1
-
-    # total count of that token in all class (pos or neg)
-    totalNoOfToken = sum(matrix[token])
-
-    # zero probability problem if token not present in class (pos or neg)
-    if(totalTokenPosLabelNeg == 0):
-        likelihoodOfTokenInNegClass = 1 / (totalNoOfToken + len(vocabulary))
-    else:
-        likelihoodOfTokenInNegClass = totalTokenPosLabelNeg / totalNoOfToken
-    
-    # multiply each likelihood to calc total likelihood
-    likelihoodOfNegativeClass *= likelihoodOfTokenInNegClass
-    
-# posterior prob of sentence in negative class
-posteriorProbOfNegClass = priorNegativeProbability * likelihoodOfNegativeClass
-print("posterior prob of neg class: ",posteriorProbOfNegClass)
-
-
-
+likelihoodPositive = calculateLikelihood(sentenceTokenized,1)
+likelihoodNegative = calculateLikelihood(sentenceTokenized,0)
+print("likelihood poss: ",likelihoodPositive)
+print("likelihood negg: ",likelihoodNegative)
