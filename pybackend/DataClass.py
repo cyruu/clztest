@@ -26,7 +26,7 @@ class DataClass:
         
 
         self.myStopWords = [
-            "a", "about", "above", "after", "again", "all", "am", "an", "and", "any", "are", "as", "at", "be", "because", 
+            "a","i","m" "about", "above", "after", "again", "all", "am", "an", "and", "any", "are", "as", "at", "be", "because", 
             "been", "before", "being", "below", "between", "both", "by", "could", "did", "do", "does", "doing", "during", 
             "each", "few", "for", "from", "further", "had", "has", "have", "he", "her", "here", "hers", "herself", "him", 
             "himself", "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself", "just", "me", "more", "most", 
