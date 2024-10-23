@@ -6,6 +6,7 @@
     "didn't": "did not",
     "doesn't": "does not",
     "don't": "do not",
+    "dont": "do not",
     "hadn't": "had not",
     "hasn't": "has not",
     "haven't": "have not",

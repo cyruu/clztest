@@ -8,17 +8,17 @@ class NaiveBayesClass:
     def __init__(self):
         # create TfIdfClass instance
         self.tfidf = TfIdfClass()
-        # df = pd.read_csv("reviews.csv")
-        # self.sentences = df["review"].to_numpy()
-        # self.label = df["label"].to_numpy()
+        df = pd.read_csv("reviews.csv")
+        self.sentences = df["review"].to_numpy()
+        self.label = df["label"].to_numpy()
         # sample dataset for testing
-        self.sentences = [
-            "i love food",
-            "great service",
-            "i hate ambiance",
+        # self.sentences = [
+        #     "i love food",
+        #     "great service",
+        #     "i hate ambiance",
             
-        ]
-        self.label = [1,1,0]
+        # ]
+        # self.label = [1,1,0]
         # for preprocessing DataClass
         self.dc = DataClass()
         # for TF-IDF
@@ -31,13 +31,16 @@ class NaiveBayesClass:
         self.totalSentences = len(self.label)
         self.totalPositiveSentence = np.count_nonzero(self.label == 1)
         self.totalNegativeSentence = np.count_nonzero(self.label == 0)
+        # self.totalPositiveSentence = self.label.count(1)
+        # self.totalNegativeSentence = self.label.count(0)
+        # print("pos sent = ",self.totalPositiveSentence,self.totalNegativeSentence)
 
 
     # main function
     def calculateSentiment(self,sentence):
         #DATA CLASS
         # preprocess the sentences
-        # self.sentences = self.dc.preprocessSentences(self.sentences)
+        self.sentences = self.dc.preprocessSentences(self.sentences)
         # create a vocabulary array
         self.vocabulary = self.tfidf.createVocabulary(self.sentences)
 
@@ -59,24 +62,25 @@ class NaiveBayesClass:
         print(self.finalTfIdfMartix)
 
         # NAIVE BAYES
-        # calcylate prior probablity
+        # calculate prior probablity
+        # for the given intput sentence
+        sentence = [sentence]
+        # convert to list to use the same method
+        sentence = self.dc.preprocessSentences(sentence)
+        sentence = sentence[0]
+
         [priorPositiveProbability,priorNegativeProbability] = self.calculatePriorProbability()
         # split given sentence into tokens
         sentenceTokenized = sentence.split()
         #calculate likelihood
         likelihoodPositive = self.calculateLikelihood(sentenceTokenized,1)
         likelihoodNegative = self.calculateLikelihood(sentenceTokenized,0)
-        print("likelihood pos",likelihoodPositive)
-        print("likelihood meg",likelihoodNegative)
         # calculate Posterior Probablility
         posteriorPositiveProbablility = priorPositiveProbability * likelihoodPositive 
         posteriorNegativeProbablility = priorNegativeProbability * likelihoodNegative 
-        ###############
-        # error in posterior calculattionmay be self
-        print("posterior pos",priorPositiveProbability)
-        print("posterior neg",posteriorNegativeProbablility)
+
         # display sentiiment
-        # self.displaySentiment(posteriorPositiveProbablility,posteriorNegativeProbablility)
+        return self.displaySentiment(posteriorPositiveProbablility,posteriorNegativeProbablility,sentence)
         # likelihoodPositive = self.calculateLikelihood(sentenceTokenized,1)
         # likelihoodNegative = self.calculateLikelihood(sentenceTokenized,0)
         # print(priorPositiveProbability,priorNegativeProbability)
@@ -88,8 +92,8 @@ class NaiveBayesClass:
         priorPositiveProbability = self.totalPositiveSentence/self.totalSentences
         # prior probability for Negative
         priorNegativeProbability = self.totalNegativeSentence/self.totalSentences
-
         return [priorPositiveProbability,priorNegativeProbability]
+
 
     # likelihood calculation
     def calculateLikelihood(self,sentenceTokenized,classLabel):
@@ -133,19 +137,21 @@ class NaiveBayesClass:
 
 
     # display sentiment based on posteriror probability
-    def displaySentiment(self,posteriorPositiveProbablility,posteriorNegativeProbablility):
+    def displaySentiment(self,posteriorPositiveProbablility,posteriorNegativeProbablility,sentence):
         print("positive posterior: ",posteriorPositiveProbablility)
         print("negative posterior: ",posteriorNegativeProbablility)
         threshold = 0.05
+        print(sentence, " :")
         if(abs(posteriorPositiveProbablility - posteriorNegativeProbablility) <= threshold):
             print("Neutral")
+            return "Neutral"
 
         else:
             if posteriorPositiveProbablility > posteriorNegativeProbablility:
                 print("Positive")
+                return "Positive"
             elif posteriorNegativeProbablility > posteriorPositiveProbablility:
                 print("Negative")
+                return "Negative"
 
-nb = NaiveBayesClass()
-sentence = "love this"
-nb.calculateSentiment(sentence)
+

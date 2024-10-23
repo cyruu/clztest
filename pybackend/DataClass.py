@@ -62,6 +62,7 @@ class DataClass:
             sentence = sentence.lower()
             # 2. Tokenization (into each words)
             words = sentence.split()
+
             # replace don't with do not
             sentence = [self.contradictionDictionary.get(word,word) for word in words]
             sentence = ' '.join(sentence)
