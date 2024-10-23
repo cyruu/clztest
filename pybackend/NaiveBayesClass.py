@@ -8,14 +8,23 @@ class NaiveBayesClass:
     def __init__(self):
         # create TfIdfClass instance
         self.tfidf = TfIdfClass()
-        df = pd.read_csv("reviews.csv")
-        self.sentences = df["review"].to_numpy()
-        self.label = df["label"].to_numpy()
+        # df = pd.read_csv("reviews.csv")
+        # self.sentences = df["review"].to_numpy()
+        # self.label = df["label"].to_numpy()
+        # sample dataset for testing
+        self.sentences = [
+            "i love food",
+            "great service",
+            "i hate ambiance",
+            
+        ]
+        self.label = [1,1,0]
         # for preprocessing DataClass
         self.dc = DataClass()
         # for TF-IDF
         self.vocabulary = set()
         self.finalTfMatrix= []
+        self.finalIdfMatrix = []
         self.finalTfIdfMartix = []
 
         # for Naive Bayes
@@ -23,22 +32,51 @@ class NaiveBayesClass:
         self.totalPositiveSentence = np.count_nonzero(self.label == 1)
         self.totalNegativeSentence = np.count_nonzero(self.label == 0)
 
+
+    # main function
     def calculateSentiment(self,sentence):
+        #DATA CLASS
         # preprocess the sentences
-        self.sentences = self.dc.preprocessSentences(self.sentences)
-        print(self.sentences[1])
-        vocabulary = self.tfidf.createVocabulary(self.sentences)
-        finalTfMatrix = self.tfidf.createTfMatrix(self.sentences)
-        finalTfMatrix = pd.DataFrame(finalTfMatrix,columns=vocabulary)
+        # self.sentences = self.dc.preprocessSentences(self.sentences)
+        # create a vocabulary array
+        self.vocabulary = self.tfidf.createVocabulary(self.sentences)
+
+        # TFIDF CLASS
+        # create tf matrix
+        self.finalTfMatrix = self.tfidf.createTfMatrix(self.sentences,self.vocabulary)
+        self.finalTfMatrix = pd.DataFrame(self.finalTfMatrix,columns=self.vocabulary)
         print("Term Frequency Matrix: TF(t,d)")
-        # print(finalTfMatrix["not"][1],finalTfMatrix["like"][1],finalTfMatrix["product"][1])
-        # print(finalTfMatrix)
-        # self.finalTfMatrix = self.tfidf.createTfMatrix(self.sentences)
-        # self.vocabulary = self.tfidf.createVocabulary(self.sentences)
-        # print(self.vocabulary)
+        # print(self.finalTfMatrix)
+        #create IDF matrix
+        self.finalIdfMatrix = self.tfidf.createIdfMatrix(self.sentences,self.vocabulary)
+        self.finalIdfMatrix = pd.DataFrame(self.finalIdfMatrix,columns=self.vocabulary)
+        print("IDF Matrix: TDF(t)")
+        # print(self.finalIdfMatrix)
+        #create TF-IDF matrix
+        self.finalTfIdfMartix = self.tfidf.calculateTfIdfMatrix(self.sentences,self.finalTfMatrix,self.finalIdfMatrix,self.vocabulary)
+        self.finalTfIdfMartix = pd.DataFrame(self.finalTfIdfMartix,columns=self.vocabulary)
+        print("TF-IDF Matrix:")
+        print(self.finalTfIdfMartix)
+
+        # NAIVE BAYES
+        # calcylate prior probablity
         [priorPositiveProbability,priorNegativeProbability] = self.calculatePriorProbability()
         # split given sentence into tokens
         sentenceTokenized = sentence.split()
+        #calculate likelihood
+        likelihoodPositive = self.calculateLikelihood(sentenceTokenized,1)
+        likelihoodNegative = self.calculateLikelihood(sentenceTokenized,0)
+        print("likelihood pos",likelihoodPositive)
+        print("likelihood meg",likelihoodNegative)
+        # calculate Posterior Probablility
+        posteriorPositiveProbablility = priorPositiveProbability * likelihoodPositive 
+        posteriorNegativeProbablility = priorNegativeProbability * likelihoodNegative 
+        ###############
+        # error in posterior calculattionmay be self
+        print("posterior pos",priorPositiveProbability)
+        print("posterior neg",posteriorNegativeProbablility)
+        # display sentiiment
+        # self.displaySentiment(posteriorPositiveProbablility,posteriorNegativeProbablility)
         # likelihoodPositive = self.calculateLikelihood(sentenceTokenized,1)
         # likelihoodNegative = self.calculateLikelihood(sentenceTokenized,0)
         # print(priorPositiveProbability,priorNegativeProbability)
@@ -58,13 +96,14 @@ class NaiveBayesClass:
         finalLikelihood = 1
         # for unseen words
         # likelihood =  1/total count of tokens in class C
+        # total value in token?
         totalTokenInGivenClass = 0
 
         for i in range(self.totalSentences):
             if(self.label[i]==classLabel):
                 for token in self.vocabulary:
                     totalTokenInGivenClass += self.finalTfIdfMartix[token][i]
-        print(totalTokenInGivenClass)
+        # print(totalTokenInGivenClass)
         for token in sentenceTokenized:
             likelihoodOfGivenClass = 0
             totalTokenPosOnGivenClass = 0
@@ -91,6 +130,21 @@ class NaiveBayesClass:
             finalLikelihood *= likelihoodOfGivenClass
 
         return finalLikelihood
+
+
+    # display sentiment based on posteriror probability
+    def displaySentiment(self,posteriorPositiveProbablility,posteriorNegativeProbablility):
+        print("positive posterior: ",posteriorPositiveProbablility)
+        print("negative posterior: ",posteriorNegativeProbablility)
+        threshold = 0.05
+        if(abs(posteriorPositiveProbablility - posteriorNegativeProbablility) <= threshold):
+            print("Neutral")
+
+        else:
+            if posteriorPositiveProbablility > posteriorNegativeProbablility:
+                print("Positive")
+            elif posteriorNegativeProbablility > posteriorPositiveProbablility:
+                print("Negative")
 
 nb = NaiveBayesClass()
 sentence = "love this"

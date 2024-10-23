@@ -4,25 +4,21 @@ import math
 class TfIdfClass:
 
     def __init__(self):
-        
-        self.vocabulary = set()
-        self.finalIdfMatrix = []
-        self.finalTfMatrix = []
-        self.finalIfIdfMatirx = []
+        pass
     
     # create vocabulary array
     def createVocabulary(self,sentences):
-
+        vocabulary = set()
         for sentence in sentences:
             tokenizedSentence = sentence.split()
             for token in tokenizedSentence:
-                self.vocabulary.add(token)
+                vocabulary.add(token)
         
-        return sorted(self.vocabulary)
+        return sorted(vocabulary)
     
     # create Term Frequency Matrix
-    def createTfMatrix(self,sentences):
-        
+    def createTfMatrix(self,sentences,vocabulary):
+        finalTfMatrix = []
         # each sentence (doc)
         for sentence in sentences:
             eachRowTfMatrix = []
@@ -36,7 +32,7 @@ class TfIdfClass:
                 tokenAppearedInDocCount[token] = totalTokenApperedInDoc
             # calculate each tf matrix
             # iterate all token in vocabulary list
-            for token in self.vocabulary:
+            for token in vocabulary:
                 # check if token in dictionary count in that doc
                 if(token in tokenAppearedInDocCount):
 
@@ -45,21 +41,21 @@ class TfIdfClass:
                 else:
                     eachRowTfMatrix.append(0)
                 
-            self.finalTfMatrix.append(eachRowTfMatrix)
-        return self.finalTfMatrix
+            finalTfMatrix.append(eachRowTfMatrix)
+        return finalTfMatrix
 
     # create a IDF matrix
-    def createIdfMatrix(self,sentences):
-        
+    def createIdfMatrix(self,sentences,vocabulary):
+        finalIdfMatrix = []
         totalNoOfDoc = len(sentences)
         totalDocContainingTokenCount = {}
         # initial doc with that token count to 0
-        for token in self.vocabulary:
+        for token in vocabulary:
             totalDocContainingTokenCount[token] = 0
         
         # check for all token in vocab
         # iterate through all token in vocab
-        for token in self.vocabulary:
+        for token in vocabulary:
             # check for every sentence
             for sentence in sentences:
                 tokenizedSentence = sentence.split()
@@ -69,25 +65,26 @@ class TfIdfClass:
 
         # calulate idf for all token in vocab
         eachIdfValue = []
-        for token in self.vocabulary:
+        for token in vocabulary:
             tokenIdfValue = math.log10(totalNoOfDoc / totalDocContainingTokenCount[token])
             eachIdfValue.append(tokenIdfValue)
         
-        self.finalIdfMatrix.append(eachIdfValue)
+        finalIdfMatrix.append(eachIdfValue)
 
-        return self.finalIdfMatrix
+        return finalIdfMatrix
     
     # create TF-IDF Matrix
-    def calculateTfIdfMatrix(self,sentences):
-        
+    def calculateTfIdfMatrix(self,sentences,finalTfMatrix,finalIdfMatrix,vocabulary):
+
+        finalIfIdfMatirx = []
         for i in range(len(sentences)):
             eachTfIdfMatrix = []
-            for token in self.vocabulary:
-                tfIdfValue = self.finalTfMatrix[token][i] * self.finalIdfMatrix[token][0]
-                # print(token, "=>", finalTfMatrix[token][i] ,"*", self.finalIdfMatrix[token][0] , "=",tfIdfValue)
+            for token in vocabulary:
+                tfIdfValue = finalTfMatrix[token][i] * finalIdfMatrix[token][0]
+                # print(token, "=>", finalTfMatrix[token][i] ,"*", finalIdfMatrix[token][0] , "=",tfIdfValue)
                 eachTfIdfMatrix.append(tfIdfValue)
-            self.finalIfIdfMatirx.append(eachTfIdfMatrix)
-        return self.finalIfIdfMatirx
+            finalIfIdfMatirx.append(eachTfIdfMatrix)
+        return finalIfIdfMatirx
     
 
 
